@@ -70,7 +70,16 @@ public class Assignments1 : TestHelper
     // @Country is een query parameter placeholder.
     public static List<Beer> GetAllBeersSortedByNameForCountry(string country)
     {
-        throw new NotImplementedException();
+        string sql =
+            @"SELECT BeerId, Beer.Name, Type, Style, Alcohol, Beer.BrewerId
+            FROM Beer
+            INNER JOIN Brewer ON Beer.BrewerId = Brewer.BrewerId
+            WHERE Brewer.Country = @Country
+            ORDER BY Beer.name";
+        using var connection = DbHelper.GetConnection();
+        var beers = connection.Query<Beer>(sql, new { Country = country }).ToList();
+        return beers;   
+        //throw new NotImplementedException();
     }
     
     // 1.4 Question
@@ -80,7 +89,12 @@ public class Assignments1 : TestHelper
     // Voor deze vraag kijken specifiek naar deze pagina: https://www.learndapper.com/dapper-query
     public static int CountBrewers()
     {
-        throw new NotImplementedException();
+        string sql = 
+            @"SELECT COUNT(*) 
+            FROM Brewer";
+        using var connection = DbHelper.GetConnection();
+        return connection.QuerySingle<int>(sql);
+        //throw new NotImplementedException();
     }
     
     // 1.5 Question
@@ -93,7 +107,13 @@ public class Assignments1 : TestHelper
     // voor Queries die net overeenkomen met de database tabellen.
     public static List<NumberOfBrewersByCountry> NumberOfBrewersByCountry()
     {
-        throw new NotImplementedException();
+        string sql =
+            @"SELECT Country, COUNT(1) AS NumberOfBreweries 
+            FROM Brewer GROUP BY Brewer.Country 
+            ORDER BY NumberOfBreweries DESC ";
+        using var connection = DbHelper.GetConnection();
+        return connection.Query<NumberOfBrewersByCountry>(sql).ToList();
+        //throw new NotImplementedException();
     }
     
     // 1.6 Question
@@ -101,7 +121,14 @@ public class Assignments1 : TestHelper
     // Je kan in MySQL de LIMIT 1 gebruiken om 1 record terug te krijgen.
     public static Beer GetBeerWithMostAlcohol()
     {
-        throw new NotImplementedException();
+        string sql = 
+            @"SELECT BeerId, Name, Type, Style, Alcohol, BrewerId 
+            FROM Beer 
+            ORDER BY Alcohol DESC 
+            LIMIT 1" ;
+        using var connection = DbHelper.GetConnection();
+        return connection.QuerySingle<Beer>(sql);
+        //throw new NotImplementedException();
     }
     
     // 1.7 Question
@@ -111,14 +138,27 @@ public class Assignments1 : TestHelper
     // indien de brouwerij niet bestaat voor een bepaalde brewerId.
     public static Brewer? GetBreweryByBrewerId(int brewerId)
     {
-        throw new NotImplementedException();
+        string sql =
+            @"SELECT BrewerId, Name, Country 
+            FROM brewer 
+            WHERE BrewerId = @brewerId";
+        using var connection = DbHelper.GetConnection();
+        return connection.QuerySingleOrDefault<Brewer>(sql, new { brewerId });
+        //throw new NotImplementedException();
     }
     
     // 1.8 Question
     // Gegeven de BrewerId, geef een overzicht van alle bieren van de brouwerij gesorteerd bij alcohol percentage.
     public static List<Beer> GetAllBeersByBreweryId(int brewerId)
     {
-        throw new NotImplementedException();
+        string sql =
+            @"SELECT BeerId, Name, Type, Style, Alcohol, BrewerId 
+            FROM Beer 
+            WHERE BrewerId = @brewerId 
+            ORDER BY Alcohol";
+        using var connection = DbHelper.GetConnection();
+        return connection.Query<Beer>(sql, new { brewerId }).ToList();
+        //throw new NotImplementedException();
     }
     
     // 1.9 Question
@@ -126,7 +166,15 @@ public class Assignments1 : TestHelper
     // Gebruik hiervoor de class CafeBeer (directory DTO). 
     public static List<CafeBeer> GetCafeBeers()
     {
-        throw new NotImplementedException();
+        string sql =
+            @"SELECT sells.CafeId, sells.BeerId, cafe.Name AS CafeName, beer.Name AS Beers 
+            FROM sells 
+            INNER JOIN beer ON sells.BeerId = beer.BeerId 
+            INNER JOIN cafe ON sells.CafeId = cafe.CafeId 
+            ORDER BY cafe.Name, beer.Name" ;
+        using var connection = DbHelper.GetConnection();
+        return connection.Query<CafeBeer>(sql).ToList();
+        //throw new NotImplementedException();
     }
     
     // De vorige 1.10 Question heb ik verwijderd, deze was nogal lastig
@@ -135,7 +183,13 @@ public class Assignments1 : TestHelper
     // Geef de gemiddelde waardering (score in de tabel Review) van een biertje terug gegeven de BeerId.
     public static decimal GetBeerRating(int beerId)
     {
-        throw new NotImplementedException();
+        string sql =
+            @"SELECT AVG(Score) 
+            FROM review 
+            WHERE BeerId = @beerId";
+        using var connection = DbHelper.GetConnection();
+        return connection.QuerySingle<decimal>(sql, new { beerId });
+        //throw new NotImplementedException();
     }
     
     // 1.11 Question
@@ -143,7 +197,12 @@ public class Assignments1 : TestHelper
     // De test werkt alleen als de vorige vraag ook correct is gemaakt.
     public static void InsertReview(int beerId, decimal score)
     {
-        throw new NotImplementedException();
+        string sql =
+            @"INSERT INTO review (beerId, score) 
+            VALUES (@beerId, @score)";
+        using var connection = DbHelper.GetConnection();
+        connection.Execute(sql, new { beerId, score });
+        //throw new NotImplementedException();
     }
     
     // 1.12 Question
@@ -151,7 +210,13 @@ public class Assignments1 : TestHelper
     // Deze test werkt alleen decimal GetBeerRating(int beerId) methode correct is (twee vragen hiervoor).
     public static int InsertReviewReturnsReviewId(int beerId, decimal score)
     {
-        throw new NotImplementedException();
+        string sql =
+            @"INSERT INTO review (beerId, score) 
+            VALUES (@beerId, @score);
+            SELECT LAST_INSERT_ID()";
+        using var connection = DbHelper.GetConnection();
+        return connection.QuerySingle<int>(sql, new { beerId, score });
+        //throw new NotImplementedException();
     }
     
     // twee methoden verwijderd
