@@ -29,7 +29,14 @@ public class Assignments2
     // !!!DOE DIT NOOIT MEER SVP!!!!
     public static List<string> GetBeersByCountryWithSqlInjection(string country)
     {
-        throw new NotImplementedException();
+        string sql = @$"
+        SELECT beer.Name, brewer.Country
+        FROM beer
+        JOIN Brewer ON Beer.BrewerId = Brewer.BrewerId
+        WHERE Brewer.Country = '{country}'";
+        var connection = DbHelper.GetConnection();
+        List<string> result = connection.Query<string>(sql).ToList();
+        return result;
     }
     
     // 2.2 Question
@@ -42,7 +49,18 @@ public class Assignments2
     // Dit betekent dus dat country null kan zijn.
     public static List<string> GetAllBeersByCountry(string? country)
     {
-        throw new NotImplementedException();
+        
+        string sql = @"
+        SELECT beer.Name, brewer.Country
+        FROM beer
+        JOIN Brewer ON Beer.BrewerId = Brewer.BrewerId
+        WHERE @Country IS NULL OR country = @Country
+        ORDER BY name";   
+        var connection = DbHelper.GetConnection();
+        List<string> result = connection.Query<string>(sql, new {Country = country }).ToList();
+        return result;
+        
+        //throw new NotImplementedException();
     }
     
     // 2.3 Question
@@ -52,7 +70,16 @@ public class Assignments2
     // Gebruikt >= (groter of gelijk aan) voor de vergelijking van het minAlcohol.
     public static List<string> GetAllBeersByCountryAndMinAlcohol(string? country = null, decimal? minAlcohol = null)
     {
-        throw new NotImplementedException(); 
+        string sql = @$"
+        SELECT beer.Name, brewer.Country
+        FROM beer
+        JOIN Brewer ON Beer.BrewerId = Brewer.BrewerId
+        WHERE (@Country IS NULL OR country = @Country) AND (@MinAlcohol IS NULL OR Alcohol >= @MinAlcohol)
+        ORDER BY name";
+        var connection = DbHelper.GetConnection();
+        List<string> result = connection.Query<string>(sql, new { Country = country, MinAlcohol = minAlcohol }).ToList();
+        return result;
+        //throw new NotImplementedException(); 
     }
     
     // 2.4 Question
@@ -111,8 +138,19 @@ public class Assignments2
     // Gebruik de volgende where-clause: WHERE BrewmasterName IS NOT NULL (in de query niet in de view)
     // Gebruik de klasse BrewerBeerBrewmaster om de resultaten in op te slaan. (directory DTO).
     public static List<BrewerBeerBrewmaster> GetAllBeerNamesWithBreweryAndBrewmaster()
-    {
-        throw new NotImplementedException();
+    { 
+        string sql = @"
+        SELECT beer.Name AS BeerName, brewer.Name AS BrewerName, brewmaster.Name AS BrewmasterName 
+        FROM beer
+        LEFT JOIN brewer ON beer.BrewerId = brewer.BrewerId
+        LEFT JOIN brewmaster ON beer.BrewerId = brewmaster.BrewerId
+        WHERE brewmaster.Name IS NOT NULL
+        ORDER BY BeerName";
+        var connection = DbHelper.GetConnection();
+        return connection.Query<BrewerBeerBrewmaster>(sql).ToList();
+        
+
+        //throw new NotImplementedException();
     }
     
     // 2.6 Question
